@@ -1,0 +1,18 @@
+version: "3.3"
+services:
+  app:
+    container_name: filesender
+    image: filesender
+    restart: always
+    build:
+      context: .
+    volumes: 
+      - /opt/app/config/config.php:/var/www/html/config/config.php
+    ports:
+      - 172.17.0.1:10080:80
+    environment:
+      DOMAIN: https://filesender-u51523.vm.elestio.app
+    env_file:
+      - .env
+
+
