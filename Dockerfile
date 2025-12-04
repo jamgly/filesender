@@ -8,16 +8,14 @@ WORKDIR /app
 COPY ./check.txt ./composer*.json ./composer.lock ./
 
 # 2. Install Alpine system dependencies, PHP extensions, and Composer
-# We use 'apk add' (Alpine's package manager) instead of 'apt-get'.
-# 'g++' is installed temporarily to compile PHP extensions and then cleaned up.
-# The entire block uses '\' to combine commands into a single, efficient layer.
+# CORRECTED: Using 'onig-dev' and 'curl-dev' (instead of libonig-dev/libcurl-dev) for Alpine compatibility.
 RUN apk update && \
     apk add --no-cache \
         libxml2-dev \
         libpng-dev \
         libpq-dev \
-        libonig-dev \
-        libcurl-dev \
+        onig-dev \
+        curl-dev \
         libzip-dev \
         g++ \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
@@ -31,8 +29,8 @@ RUN apk update && \
         libxml2-dev \
         libpng-dev \
         libpq-dev \
-        libonig-dev \
-        libcurl-dev \
+        onig-dev \
+        curl-dev \
         libzip-dev \
         g++ \
     && rm -rf /var/cache/apk/*
