@@ -8,7 +8,9 @@ WORKDIR /app
 COPY ./check.txt ./composer*.json ./composer.lock ./
 
 # 2. Install Alpine system dependencies, PHP extensions, and Composer
-# CORRECTED: Using 'onig-dev' and 'curl-dev' (instead of libonig-dev/libcurl-dev) for Alpine compatibility.
+# We use 'apk add' (Alpine's package manager) instead of 'apt-get'.
+# Package names are corrected for Alpine (e.g., 'curl-dev', 'onig-dev').
+# 'g++' is installed temporarily for compiling extensions and then removed in the cleanup step.
 RUN apk update && \
     apk add --no-cache \
         libxml2-dev \
@@ -55,9 +57,10 @@ RUN if [ -f "$source_file" ]; then \
         echo ".env has been added to dockerignore; skipping copy; if you want to copy it, remove it from dockerignore."; \
     fi
 
-# 4. Expose the standard PHP-FPM port (9000), which will be used by Nginx/Apache.
+# 4. Expose the standard PHP-FPM port (9000).
+# NOTE: The FPM image requires a reverse proxy (like Nginx) to forward traffic here.
 EXPOSE 9000
 
 # 5. Start the application
 # The base image (php:*-fpm) already includes the correct default command (CMD ["php-fpm", "-F"])
-# to run PHP-FPM in the foreground, so we don't need to explicitly add a CMD here.
+# to run PHP-FPM in the foreground, so no custom CMD is needed.
