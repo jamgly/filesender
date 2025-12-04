@@ -4,19 +4,16 @@ FROM php:8.3.28-fpm-alpine3.22
 WORKDIR /app
 
 # 1. Copy necessary files for the dependency installation layer
-# This ensures Docker's cache is only invalidated when these files change.
 COPY ./check.txt ./composer*.json ./composer.lock ./
 
 # 2. Install Alpine system dependencies, PHP extensions, and Composer
-# We use 'apk add' (Alpine's package manager) instead of 'apt-get'.
-# Package names are corrected for Alpine (e.g., 'curl-dev', 'onig-dev').
-# 'g++' is installed temporarily for compiling extensions and then removed in the cleanup step.
+# FIX: 'onig-dev' is replaced with 'oniguruma-dev' for Alpine compatibility.
 RUN apk update && \
     apk add --no-cache \
         libxml2-dev \
         libpng-dev \
         libpq-dev \
-        onig-dev \
+        oniguruma-dev \
         curl-dev \
         libzip-dev \
         g++ \
@@ -31,7 +28,7 @@ RUN apk update && \
         libxml2-dev \
         libpng-dev \
         libpq-dev \
-        onig-dev \
+        oniguruma-dev \
         curl-dev \
         libzip-dev \
         g++ \
@@ -45,7 +42,6 @@ ARG source_file=./.env
 ARG destination_dir=./.env
 
 #.env copying management
-# This logic checks if .env exists and handles the copying process based on its presence and dockerignore status.
 RUN if [ -f "$source_file" ]; then \
         if [ "$source_file" != "$destination_dir" ]; then \
             echo "Copying $source_file to $destination_dir"; \
@@ -58,9 +54,4 @@ RUN if [ -f "$source_file" ]; then \
     fi
 
 # 4. Expose the standard PHP-FPM port (9000).
-# NOTE: The FPM image requires a reverse proxy (like Nginx) to forward traffic here.
 EXPOSE 9000
-
-# 5. Start the application
-# The base image (php:*-fpm) already includes the correct default command (CMD ["php-fpm", "-F"])
-# to run PHP-FPM in the foreground, so no custom CMD is needed.
